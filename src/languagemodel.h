@@ -53,6 +53,45 @@ private:
     QString m_regionLabel;
 };
 
+class SYSTEMSETTINGS_EXPORT LocaleSection {
+    Q_GADGET
+    Q_ENUMS(Section)
+public:
+    enum Section {
+       All = 0,
+       // POSIX sections
+       CType,
+       Collate,
+       Messages,
+       Monetary,
+       Numeric,
+       Time,
+#ifdef __GLIBC__
+       // GNU Libc Extensions
+       Address,
+       Identification,
+       Measurement,
+       Name,
+       Paper,
+       Telephone,
+#endif // __GLIBC__
+    };
+
+    LocaleSection(Section section, Language language);
+
+    QString name() const;
+    Section section() const;
+    Language language() const;
+
+    static const char* variableName(const LocaleSection::Section &section);
+private:
+
+    QString m_name;
+    Section m_section;
+    Language m_language;
+};
+
+
 class SYSTEMSETTINGS_EXPORT LanguageModel: public QAbstractListModel
 {
     Q_OBJECT
@@ -84,6 +123,7 @@ public:
     Q_INVOKABLE QString locale(int index) const;
 
     Q_INVOKABLE void setSystemLocale(const QString &localeCode, LocaleUpdateMode updateMode);
+    Q_INVOKABLE void setAdditionalLocaleSection(LocaleSection section, const QString &localeCode, bool remove = false);
 
     static QList<Language> supportedLanguages();
 

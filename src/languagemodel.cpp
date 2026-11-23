@@ -33,6 +33,7 @@
 #include "localeconfig.h"
 
 #include <QDir>
+#include <QSaveFile>
 #include <QDebug>
 #include <QSettings>
 #include <QHash>
@@ -241,4 +242,119 @@ int LanguageModel::getLocaleIndex(const QString &locale) const
     }
 
     return -1;
+}
+
+void LanguageModel::setAdditionalLocaleSection(LocaleSection section, const QString &localeCode, bool remove)
+{
+    QFile localeConfig;
+    localeConfig.setFileName(localeConfigPath());
+
+    QSaveFile localeConfigNew(localeConfig.fileName());
+
+    const char* variable = LocaleSection::variableName(section.section());
+    const QByteArray replacement = (QStringLiteral("%1=\"%2\"").arg(variable).arg(localeCode)).toLocal8Bit();
+
+    QList<QByteArray> content({});
+
+    if (localeConfig.exists()) {
+        localeConfig.open(QIODevice::ReadOnly);
+
+        if (!localeConfig.isOpen()) {
+            return;
+        }
+        content = localeConfig.readAll().split('\n');
+        localeConfig.close();
+    }
+
+    content.removeAt(content.indexOf(replacement));
+    if (!remove) {
+        content.append(replacement);
+    }
+
+    localeConfigNew.open(QIODevice::WriteOnly);
+
+    if (!localeConfigNew.isOpen()) {
+        qWarning() << "Could not open file!";
+        return;
+    }
+
+    QTextStream stream(&localeConfigNew);
+    stream << content.join('\n');
+    stream.flush();
+
+    if (!localeConfigNew.commit())
+        qWarning() << "Writing file failed!";
+
+}
+
+QString LocaleSection::name() const
+{
+    switch(m_section) {
+        case Section::All:
+            return QStringLiteral("All");
+        case Section::CType:
+            return QStringLiteral("Character Conversions");
+        case Section::Collate:
+            return QStringLiteral("Sorting and Collation");
+        case Section::Messages:
+            return QStringLiteral("Messages");
+        case Section::Monetary:
+            return QStringLiteral("Currency");
+        case Section::Numeric:
+            return QStringLiteral("Numbers");
+        case Section::Time:
+            return QStringLiteral("Time and Date");
+#ifdef __GLIBC__
+        case Section::Address:
+            return QStringLiteral("Addresses");
+        case Section::Identification:
+            return QStringLiteral("Locale Metadata");
+        case Section::Measurement:
+            return QStringLiteral("Measurement System");
+        case Section::Name:
+            return QStringLiteral("Personal Names");
+        case Section::Paper:
+            return QStringLiteral("Paper Size");
+        case Section::Telephone:
+            return QStringLiteral("Telephone Numbers");
+#endif // __GLIBC__
+        default:
+            return QString();
+    }
+}
+
+const char* LocaleSection::variableName(const LocaleSection::Section &section)
+{
+    switch(section) {
+        case Section::All:
+            return "LC_ALL";
+        case Section::CType:
+            return "LC_CTYPE";
+        case Section::Collate:
+            return "LC_COLLATE";
+        case Section::Messages:
+            return "LC_MESSAGES";
+        case Section::Monetary:
+            return "LC_MONERARY";
+        case Section::Numeric:
+            return "LC_NUMERIC";
+        case Section::Time:
+            return "LC_TIME";
+#ifdef __GLIBC__
+        case Section::Address:
+            return "LC_ADDRESS";
+        case Section::Identification:
+            return "LC_IDENTIFICATION";
+        case Section::Measurement:
+            return "LC_MEASUREMENT";
+        case Section::Name:
+            return "LC_NAME";
+        case Section::Paper:
+            return "LC_PAPER";
+        case Section::Telephone:
+            return "LC_TELEPHONE";
+#endif // __GLIBC__
+        default:
+            return "";
+    }
 }
