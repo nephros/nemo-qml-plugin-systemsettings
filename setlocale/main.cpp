@@ -105,11 +105,6 @@ static bool writeLocale(QString &configPath, QString &locale)
 
 int main(int argc, char *argv[])
 {
-    if (argc != 2) {
-        qWarning() << "No locale given";
-        return EXIT_FAILURE;
-    }
-
     if (!sailfish_access_control_hasgroup(getuid(), "users")) {
         qWarning() << "User with id" << getuid() << "is not member of users group";
         return EXIT_FAILURE;
@@ -118,6 +113,18 @@ int main(int argc, char *argv[])
     QString configPath = localeConfigPath();
 
     if (configPath.isEmpty()) {
+        return EXIT_FAILURE;
+    }
+
+    if (QString(argv[1]) == QString("-createDir")) {
+        if (!ensureDirectory(configPath)) {
+            return EXIT_FAILURE;
+        }
+        return EXIT_SUCCESS;
+    }
+
+    if (argc != 2) {
+        qWarning() << "No locale given";
         return EXIT_FAILURE;
     }
 
