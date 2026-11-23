@@ -252,7 +252,6 @@ void LanguageModel::setAdditionalLocaleSection(LocaleSection section, const QStr
     QSaveFile localeConfigNew(localeConfig.fileName());
 
     const char* variable = LocaleSection::variableName(section.section());
-    const QByteArray replacement = (QStringLiteral("%1=\"%2\"").arg(variable).arg(localeCode)).toLocal8Bit();
 
     QList<QByteArray> content({});
 
@@ -266,11 +265,22 @@ void LanguageModel::setAdditionalLocaleSection(LocaleSection section, const QStr
         localeConfig.close();
     }
 
-    content.removeAt(content.indexOf(replacement));
-    if (!remove) {
-        content.append(replacement);
+    // remove old, maybe add new:
+    const QByteArray newValue = QByteArray(variable) + QByteArrayLiteral("=") + localeCode.toUtf8();
+    for (QList<QByteArray>::iterator it = content.begin(); it != content.end(); ++it) {
+        if (!it->startsWith(variable)) {
+            continue;
+        } else {
+            if (remove)
+                content.erase(it);
+            else
+                *it = newValue;
+
+            break;
+        }
     }
 
+    // ensure the location exists:
     if (!QDir().exists(QFileInfo(localeConfigNew.fileName()).absolutePath())) {
         int ret = QProcess::execute(QLatin1String("/usr/libexec/setlocale"), QStringList("-createDir"));
         if (ret != 0) {
