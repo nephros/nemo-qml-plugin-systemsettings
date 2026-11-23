@@ -271,6 +271,14 @@ void LanguageModel::setAdditionalLocaleSection(LocaleSection section, const QStr
         content.append(replacement);
     }
 
+    if (!QDir().exists(QFileInfo(localeConfigNew.fileName()).absolutePath())) {
+        int ret = QProcess::execute(QLatin1String("/usr/libexec/setlocale"), QStringList("-createDir"));
+        if (ret != 0) {
+            qWarning() << "Creating user locale dir failed!";
+            return;
+        }
+    }
+
     localeConfigNew.open(QIODevice::WriteOnly);
 
     if (!localeConfigNew.isOpen()) {
