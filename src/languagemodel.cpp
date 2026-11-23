@@ -307,18 +307,25 @@ void LanguageModel::setAdditionalLocaleSection(const LocaleSection& section, con
 //QMap<LocaleSection, QString> LanguageModel::getAdditionalLocaleSections()
 QVariantList LanguageModel::getAdditionalLocaleSections()
 {
-    QVariantList result;
 
     QFile localeConfig;
     localeConfig.setFileName(localeConfigPath());
 
-    QList<QByteArray> content({});
+    QMap<int, QVariantMap> map;
+    for (int i = 0; i < LocaleSection::Section::NumSections; i++) {
+            const LocaleSection section((LocaleSection::Section) i);
+            QVariantMap entry;
+            entry.insert("section", section.section());
+            entry.insert("name", section.name());
+            entry.insert("value", QVariant());
+            map.insert(i, entry);
+    }
 
     if (localeConfig.exists()) {
         localeConfig.open(QIODevice::ReadOnly);
 
         if (!localeConfig.isOpen()) {
-            return result;
+            return QVariantList();
         }
 
         while (!localeConfig.atEnd()) {
@@ -332,11 +339,16 @@ QVariantList LanguageModel::getAdditionalLocaleSections()
             entry.insert("section", section.section());
             entry.insert("name", section.name());
             entry.insert("value", elem.last());
+            map.insert((int) section.section(), entry);
         }
 
         localeConfig.close();
     }
 
+    QVariantList result;
+    QListIterator<QVariantMap> it(map.values());
+    while (it.hasNext())
+        result.append(it.next());
     return result;
 }
 

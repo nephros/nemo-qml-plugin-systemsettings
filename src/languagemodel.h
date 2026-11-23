@@ -76,6 +76,7 @@ public:
        Paper,
        Telephone,
 #endif // __GLIBC__
+       NumSections
     };
 
     LocaleSection(Section section = Section::Invalid);
@@ -83,7 +84,7 @@ public:
     QString name() const;
     Section section() const;
 
-    bool isValid() const { return m_section != Section::Invalid; };
+    bool isValid() const { return ((m_section != Section::Invalid) && (m_section < Section::NumSections)); };
 
     static LocaleSection fromVariableName(const QString& var);
     static QString sectionName(const LocaleSection::Section &section);
