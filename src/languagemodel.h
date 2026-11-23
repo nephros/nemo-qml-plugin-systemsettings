@@ -126,7 +126,7 @@ public:
 
     Q_INVOKABLE void setSystemLocale(const QString &localeCode, LocaleUpdateMode updateMode);
     Q_INVOKABLE void setAdditionalLocaleSection(const LocaleSection &section, const QString &localeCode, bool remove = false);
-    Q_INVOKABLE QList<QVariantMap> getAdditionalLocaleSections();
+    Q_INVOKABLE QVariantList getAdditionalLocaleSections();
 
     static QList<Language> supportedLanguages();
 

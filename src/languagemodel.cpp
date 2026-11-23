@@ -305,9 +305,9 @@ void LanguageModel::setAdditionalLocaleSection(const LocaleSection& section, con
 }
 
 //QMap<LocaleSection, QString> LanguageModel::getAdditionalLocaleSections()
-QList<QVariantMap> LanguageModel::getAdditionalLocaleSections()
+QVariantList LanguageModel::getAdditionalLocaleSections()
 {
-    QList<QVariantMap> result;
+    QVariantList result;
 
     QFile localeConfig;
     localeConfig.setFileName(localeConfigPath());
