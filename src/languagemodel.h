@@ -58,8 +58,9 @@ class SYSTEMSETTINGS_EXPORT LocaleSection {
     Q_ENUMS(Section)
 public:
     enum Section {
-       All = 0,
+       Invalid = -1,
        // POSIX sections
+       All,
        CType,
        Collate,
        Messages,
@@ -77,20 +78,21 @@ public:
 #endif // __GLIBC__
     };
 
-    LocaleSection(Section section, Language language);
+    LocaleSection(Section section = Section::Invalid);
 
     QString name() const;
     Section section() const;
-    Language language() const;
 
+    bool isValid() const { return m_section != Section::Invalid; };
+
+    static LocaleSection fromVariableName(const QString& var);
+    static QString sectionName(const LocaleSection::Section &section);
     static const char* variableName(const LocaleSection::Section &section);
-private:
 
+private:
     QString m_name;
     Section m_section;
-    Language m_language;
 };
-
 
 class SYSTEMSETTINGS_EXPORT LanguageModel: public QAbstractListModel
 {
@@ -123,7 +125,8 @@ public:
     Q_INVOKABLE QString locale(int index) const;
 
     Q_INVOKABLE void setSystemLocale(const QString &localeCode, LocaleUpdateMode updateMode);
-    Q_INVOKABLE void setAdditionalLocaleSection(LocaleSection section, const QString &localeCode, bool remove = false);
+    Q_INVOKABLE void setAdditionalLocaleSection(const LocaleSection &section, const QString &localeCode, bool remove = false);
+    Q_INVOKABLE QList<QVariantMap> getAdditionalLocaleSections();
 
     static QList<Language> supportedLanguages();
 

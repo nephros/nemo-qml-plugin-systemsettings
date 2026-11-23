@@ -240,8 +240,11 @@ int LanguageModel::getLocaleIndex(const QString &locale) const
     return -1;
 }
 
-void LanguageModel::setAdditionalLocaleSection(LocaleSection section, const QString &localeCode, bool remove)
+void LanguageModel::setAdditionalLocaleSection(const LocaleSection& section, const QString &localeCode, bool remove)
 {
+    if (!section.isValid())
+        return;
+
     QFile localeConfig;
     localeConfig.setFileName(localeConfigPath());
 
@@ -301,9 +304,85 @@ void LanguageModel::setAdditionalLocaleSection(LocaleSection section, const QStr
 
 }
 
-QString LocaleSection::name() const
+//QMap<LocaleSection, QString> LanguageModel::getAdditionalLocaleSections()
+QList<QVariantMap> LanguageModel::getAdditionalLocaleSections()
 {
-    switch(m_section) {
+    QList<QVariantMap> result;
+
+    QFile localeConfig;
+    localeConfig.setFileName(localeConfigPath());
+
+    QList<QByteArray> content({});
+
+    if (localeConfig.exists()) {
+        localeConfig.open(QIODevice::ReadOnly);
+
+        if (!localeConfig.isOpen()) {
+            return result;
+        }
+
+        while (!localeConfig.atEnd()) {
+            const auto elem = localeConfig.readLine().trimmed().split('=');
+            if(elem.length() != 2) {
+                qWarning() << "Invalid entry.";
+                continue;
+            }
+            const LocaleSection section = LocaleSection::fromVariableName(elem.first());
+            QVariantMap entry;
+            entry.insert("section", section.section());
+            entry.insert("name", section.name());
+            entry.insert("value", elem.last());
+        }
+
+        localeConfig.close();
+    }
+
+    return result;
+}
+
+LocaleSection::LocaleSection(Section section)
+        : m_section(section)
+{
+        m_name = sectionName(section);
+}
+
+LocaleSection LocaleSection::fromVariableName(const QString& var)
+{
+    if (var == "LC_ALL")
+        return LocaleSection(Section::All);
+    if (var == "LC_CTYPE")
+        return LocaleSection(Section::CType);
+    if (var == "LC_COLLATE")
+        return LocaleSection(Section::Collate);
+    if (var == "LC_MESSAGES")
+        return LocaleSection(Section::Messages);
+    if (var == "LC_MONERARY")
+        return LocaleSection(Section::Monetary);
+    if (var == "LC_NUMERIC")
+        return LocaleSection(Section::Numeric);
+    if (var == "LC_TIME")
+        return LocaleSection(Section::Time);
+#ifdef __GLIBC__
+    if (var == "LC_ADDRESS")
+        return LocaleSection(Section::Address);
+    if (var == "LC_IDENTIFICATION")
+        return LocaleSection(Section::Identification);
+    if (var == "LC_MEASUREMENT")
+        return LocaleSection(Section::Measurement);
+    if (var == "LC_NAME")
+        return LocaleSection(Section::Name);
+    if (var == "LC_PAPER")
+        return LocaleSection(Section::Paper);
+    if (var == "LC_TELEPHONE")
+        return LocaleSection(Section::Telephone);
+#endif // __GLIBC__
+
+    return LocaleSection(Section::Invalid);
+}
+
+QString LocaleSection::sectionName(const LocaleSection::Section &section)
+{
+    switch(section) {
         case Section::All:
             return QStringLiteral("All");
         case Section::CType:
@@ -371,4 +450,14 @@ const char* LocaleSection::variableName(const LocaleSection::Section &section)
         default:
             return "";
     }
+}
+
+QString LocaleSection::name() const
+{
+    return sectionName(m_section);
+}
+
+LocaleSection::Section LocaleSection::section() const
+{
+    return m_section;
 }
