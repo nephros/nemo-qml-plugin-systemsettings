@@ -129,7 +129,6 @@ public:
 
     QString name() const;
     const char* variableName() const;
-//    Section section() const;
     QString value() const;
 
     bool isValid() const;
@@ -138,7 +137,6 @@ public:
 
 private:
     static LocaleSection fromVariableName(const QString& var);
-//    static const char* toVariableName(const LocaleSection::Section &section);
     friend class LocaleSectionModel;
 
 private:
@@ -172,7 +170,7 @@ public:
 
     int currentIndex() const;
 
-    Q_INVOKABLE void setLocaleSection(const LocaleSection &section, const QString &localeCode, UpdateMode updateMode);
+    Q_INVOKABLE void setLocaleSection(const QString &variable, const QString &localeCode, UpdateMode updateMode);
 
 signals:
     void currentIndexChanged();

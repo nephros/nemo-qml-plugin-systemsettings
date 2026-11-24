@@ -248,17 +248,12 @@ bool LocaleSection::isValid() const
           && !name().isNull()
           );
 };
-void LocaleSectionModel::setLocaleSection(const LocaleSection& section, const QString &localeCode, UpdateMode updateMode)
+void LocaleSectionModel::setLocaleSection(const QString& variable, const QString &localeCode, UpdateMode updateMode)
 {
-    if (!section.isValid())
-        return;
-
     QFile localeConfig;
     localeConfig.setFileName(localeConfigPath());
 
     QSaveFile localeConfigNew(localeConfig.fileName());
-
-    const char* variable = section.variableName();
 
     QList<QByteArray> content({});
 
@@ -273,16 +268,15 @@ void LocaleSectionModel::setLocaleSection(const LocaleSection& section, const QS
     }
 
     // remove old, maybe add new:
-    const QByteArray newValue = QByteArray(variable) + QByteArrayLiteral("=") + localeCode.toUtf8();
+    const QByteArray newValue = QByteArray(variable.toUtf8()) + QByteArrayLiteral("=") + localeCode.toUtf8();
     for (QList<QByteArray>::iterator it = content.begin(); it != content.end(); ++it) {
-        if (!it->startsWith(variable)) {
+        if (!it->startsWith(variable.toUtf8())) {
             continue;
         } else {
             if (updateMode == UpdateMode::RemoveValue)
                 content.erase(it);
             else
                 *it = newValue;
-
             break;
         }
     }
