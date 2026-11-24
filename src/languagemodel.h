@@ -53,53 +53,10 @@ private:
     QString m_regionLabel;
 };
 
-class SYSTEMSETTINGS_EXPORT LocaleSection {
-    Q_GADGET
-    Q_ENUMS(Section)
-public:
-    enum Section {
-       Invalid = -1,
-       // POSIX sections
-       All,
-       CType,
-       Collate,
-       Messages,
-       Monetary,
-       Numeric,
-       Time,
-#ifdef __GLIBC__
-       // GNU Libc Extensions
-       Address,
-       Identification,
-       Measurement,
-       Name,
-       Paper,
-       Telephone,
-#endif // __GLIBC__
-       NumSections
-    };
-
-    LocaleSection(Section section = Section::Invalid);
-
-    QString name() const;
-    Section section() const;
-
-    bool isValid() const { return ((m_section != Section::Invalid) && (m_section < Section::NumSections)); };
-
-    static LocaleSection fromVariableName(const QString& var);
-    static QString sectionName(const LocaleSection::Section &section);
-    static const char* variableName(const LocaleSection::Section &section);
-
-private:
-    QString m_name;
-    Section m_section;
-};
-
 class SYSTEMSETTINGS_EXPORT LanguageModel: public QAbstractListModel
 {
     Q_OBJECT
     Q_PROPERTY(int currentIndex READ currentIndex NOTIFY currentIndexChanged)
-    Q_PROPERTY(bool includeCLocale MEMBER m_includeCLocale)
     Q_ENUMS(LocaleUpdateMode)
 
 public:
@@ -127,10 +84,8 @@ public:
     Q_INVOKABLE QString locale(int index) const;
 
     Q_INVOKABLE void setSystemLocale(const QString &localeCode, LocaleUpdateMode updateMode);
-    Q_INVOKABLE void setAdditionalLocaleSection(const LocaleSection &section, const QString &localeCode, bool remove = false);
-    Q_INVOKABLE QVariantList getAdditionalLocaleSections();
 
-    static QList<Language> supportedLanguages(bool includeCLocale = false);
+    static QList<Language> supportedLanguages();
 
 signals:
     void currentIndexChanged();
@@ -144,7 +99,94 @@ private:
 
     QList<Language> m_languages;
     int m_currentIndex;
-    bool m_includeCLocale;
 };
+
+class SYSTEMSETTINGS_EXPORT LocaleSection {
+public:
+    enum Section {
+       Invalid = -1,
+       // POSIX sections
+       All,
+       CType,
+       Collate,
+       Messages,
+       Monetary,
+       Numeric,
+       Time,
+#ifdef __GLIBC__
+       // GNU Libc Extensions
+       Address,
+       Identification,
+       Measurement,
+       Name,
+       Paper,
+       Telephone,
+#endif // __GLIBC__
+       NumSections
+    };
+
+    LocaleSection(Section section = Section::Invalid, QString value = QString());
+
+    QString name() const;
+    const char* variableName() const;
+//    Section section() const;
+    QString value() const;
+
+    bool isValid() const;
+
+    void setValue(const QString &value);
+
+private:
+    static LocaleSection fromVariableName(const QString& var);
+//    static const char* toVariableName(const LocaleSection::Section &section);
+    friend class LocaleSectionModel;
+
+private:
+    Section m_section;
+    QString m_value;
+};
+
+class SYSTEMSETTINGS_EXPORT LocaleSectionModel: public QAbstractListModel
+{
+    Q_OBJECT
+    Q_ENUMS(UpdateMode)
+public:
+    enum LocaleSectionRoles {
+        NameRole = Qt::UserRole + 1,
+//        SectionRole,
+        VariableRole,
+        ValueRole,
+    };
+
+    enum UpdateMode {
+        DefaultValue = 0,
+        AddValue,
+        RemoveValue,
+    };
+
+    explicit LocaleSectionModel(QObject *parent = 0);
+    virtual ~LocaleSectionModel();
+
+    virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
+    virtual QVariant data(const QModelIndex &index, int role) const;
+
+    int currentIndex() const;
+
+    Q_INVOKABLE void setLocaleSection(const LocaleSection &section, const QString &localeCode, UpdateMode updateMode);
+
+signals:
+    void currentIndexChanged();
+
+protected:
+    QList<LocaleSection> getLocaleSections();
+
+private:
+    LanguageModel m_model;
+
+    QList<Language> m_languages;
+    QList<LocaleSection> m_localesections;
+    int m_currentIndex;
+};
+
 
 #endif

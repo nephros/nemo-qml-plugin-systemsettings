@@ -90,8 +90,9 @@ public:
     {
         Q_ASSERT(QLatin1String(uri) == QLatin1String("org.nemomobile.systemsettings"));
         qmlRegisterType<LanguageModel>(uri, 1, 0, "LanguageModel");
-        qmlRegisterUncreatableType<LocaleSection>(uri, 1, 0, "LocaleSection", "LocaleSection should not be created from QML.");
-        qRegisterMetaType<LocaleSection::Section>("LocaleSection::Section");
+        qmlRegisterType<LocaleSectionModel>(uri, 1, 0, "LocaleSectionModel");
+//        qmlRegisterUncreatableType<LocaleSection>(uri, 1, 0, "LocaleSection", "LocaleSection should not be created from QML.");
+//        qRegisterMetaType<LocaleSection::Section>("LocaleSection::Section");
         qmlRegisterType<DateTimeSettings>(uri, 1, 0, "DateTimeSettings");
         qmlRegisterType<ProfileControl>(uri, 1, 0, "ProfileControl");
         qmlRegisterType<AlarmToneModel>(uri, 1, 0, "AlarmToneModel");
