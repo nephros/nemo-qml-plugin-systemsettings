@@ -389,6 +389,7 @@ LocaleSectionModel::LocaleSectionModel(QObject *parent)
 {
     m_languages = LanguageModel::supportedLanguages();
     m_languages.insert(0, Language("C", "C", QString(), QStringLiteral("default/none")));
+    getLocaleSections();
 }
 
 LocaleSectionModel::~LocaleSectionModel()
