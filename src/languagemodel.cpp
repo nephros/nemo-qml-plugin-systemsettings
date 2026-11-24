@@ -395,6 +395,17 @@ LocaleSectionModel::~LocaleSectionModel()
 {
 }
 
+QHash<int, QByteArray> LocaleSectionModel::roleNames() const
+{
+    QHash<int, QByteArray> roles;
+    roles[NameRole] = "name";
+    roles[VariableRole] = "variable";
+    roles[ValueRole] = "value";
+
+    return roles;
+}
+
+
 int LocaleSectionModel::rowCount(const QModelIndex & parent) const
 {
     Q_UNUSED(parent)
@@ -428,3 +439,28 @@ int LocaleSectionModel::currentIndex() const
 {
     return m_currentIndex;
 }
+
+QString LocaleSectionModel::sectionName(int index) const
+{
+    if (index < 0 || index >= m_localesections.count()) {
+        return QString();
+    }
+    return m_localesections.at(index).name();
+}
+
+QString LocaleSectionModel::variableName(int index) const
+{
+    if (index < 0 || index >= m_localesections.count()) {
+        return QString();
+    }
+    return m_localesections.at(index).variableName();
+}
+
+QString LocaleSectionModel::value(int index) const
+{
+    if (index < 0 || index >= m_localesections.count()) {
+        return QString();
+    }
+    return m_localesections.at(index).value();
+}
+

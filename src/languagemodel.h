@@ -147,6 +147,7 @@ private:
 class SYSTEMSETTINGS_EXPORT LocaleSectionModel: public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(int currentIndex READ currentIndex NOTIFY currentIndexChanged)
     Q_ENUMS(UpdateMode)
 public:
     enum LocaleSectionRoles {
@@ -170,15 +171,24 @@ public:
 
     int currentIndex() const;
 
+    Q_INVOKABLE QString sectionName(int index) const;
+    Q_INVOKABLE QString variableName(int index) const;
+    Q_INVOKABLE QString value(int index) const;
+
     Q_INVOKABLE void setLocaleSection(const QString &variable, const QString &localeCode, UpdateMode updateMode);
+
+    static QList<LocaleSection> getLocaleSections();
 
 signals:
     void currentIndexChanged();
 
 protected:
-    QList<LocaleSection> getLocaleSections();
+    QHash<int, QByteArray> roleNames() const;
 
 private:
+    //void readCurrentLocale();
+    //int getLocaleIndex(const QString &locale) const;
+
     LanguageModel m_model;
 
     QList<Language> m_languages;
