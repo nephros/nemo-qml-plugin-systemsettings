@@ -78,10 +78,11 @@ QString Language::regionLabel() const
 }
 
 LanguageModel::LanguageModel(QObject *parent)
-    : QAbstractListModel(parent),
-      m_currentIndex(-1)
+    : QAbstractListModel(parent)
+    , m_currentIndex(-1)
+    , m_includeCLocale(false)
 {
-    m_languages = supportedLanguages();
+    m_languages = supportedLanguages(m_includeCLocale);
     readCurrentLocale();
 }
 
@@ -201,7 +202,7 @@ void LanguageModel::setSystemLocale(const QString &localeCode, LocaleUpdateMode 
     }
 }
 
-QList<Language> LanguageModel::supportedLanguages()
+QList<Language> LanguageModel::supportedLanguages(bool includeCLocale)
 {
     // get supported languages
     QDir languageDirectory(LanguageSupportDirectory);
@@ -224,6 +225,10 @@ QList<Language> LanguageModel::supportedLanguages()
     }
 
     std::sort(languages.begin(), languages.end(), nameLessThan);
+    if(includeCLocale) {
+        Language c("C", "C", "", "default/none");
+        languages.insert(0, c);
+    }
     return languages;
 }
 

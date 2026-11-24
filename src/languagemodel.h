@@ -99,6 +99,7 @@ class SYSTEMSETTINGS_EXPORT LanguageModel: public QAbstractListModel
 {
     Q_OBJECT
     Q_PROPERTY(int currentIndex READ currentIndex NOTIFY currentIndexChanged)
+    Q_PROPERTY(bool includeCLocale MEMBER m_includeCLocale)
     Q_ENUMS(LocaleUpdateMode)
 
 public:
@@ -129,7 +130,7 @@ public:
     Q_INVOKABLE void setAdditionalLocaleSection(const LocaleSection &section, const QString &localeCode, bool remove = false);
     Q_INVOKABLE QVariantList getAdditionalLocaleSections();
 
-    static QList<Language> supportedLanguages();
+    static QList<Language> supportedLanguages(bool includeCLocale = false);
 
 signals:
     void currentIndexChanged();
@@ -143,6 +144,7 @@ private:
 
     QList<Language> m_languages;
     int m_currentIndex;
+    bool m_includeCLocale;
 };
 
 #endif
